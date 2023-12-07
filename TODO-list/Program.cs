@@ -5,7 +5,6 @@ bool appWorking = true;
 do
 {
     Console.Clear();
-    Console.WriteLine("Hello!");
     Console.WriteLine("[S]ee all TODOs");
     Console.WriteLine("[A]dd a TODO");
     Console.WriteLine("[R]emove a TODO");
@@ -23,17 +22,14 @@ do
         case 's':
         case 'S':
             PrintTodos(todos);
-            Console.ReadKey();
             break;
         case 'a':
         case 'A':
             AddTodo(todos);
-            Console.ReadKey();
             break;
         case 'r':
         case 'R':
             RemoveTodo(todos);
-            Console.ReadKey();
             break;
         case 'e':
         case 'E':
@@ -41,79 +37,98 @@ do
             break;
         default:
             Console.WriteLine("Invalid input");
-            Console.ReadKey();
             break;
     }
+    Console.ReadKey();
 } while (appWorking);
 
 void PrintTodos(List<string> todos)
 {
-    int i = 1;
     Console.Clear();
     if (todos.Count == 0)
     {
-        Console.WriteLine("No TODOs have been added yet.");
+        ShowNoToDosMessage();
+        return;
     }
-    else
+    for (int i = 0; i < todos.Count; i++)
     {
-        foreach (string todo in todos)
-        {
-            Console.WriteLine($"{i}. {todo}");
-            i++;
-        }
+        Console.WriteLine($"{i + 1}. {todos[i]}");
     }
 }
 void AddTodo(List<string> todos)
 {
     Console.Clear();
     string todo;
-    bool todoExist = false;
     do
     {
         Console.WriteLine("Enter the TODO: ");
         todo = Console.ReadLine();
-        if (todos.Contains(todo))
-        {
-            Console.WriteLine("TODO like that alredy exists");
-            break;
-        }
-        else
-        {
-                todos.Add(todo);
-                Console.WriteLine($"TODO successfully added: {todo}");
-                todoExist = true;
-        }
-    } while (!todoExist);
+
+    } while (!IsToDoValid(todo));
+
+    todos.Add(todo);
+    Console.WriteLine($"TODO successfully added: {todo}");
+}
+
+bool IsToDoValid(string todo)
+{
+    if (todos.Contains(todo))
+    {
+        Console.WriteLine("TODO like that alredy exists");
+        return false;
+    }
+    else if (todo == "")
+    {
+        Console.WriteLine("TODO can't be empty");
+        return false;
+    }
+    return true;
 }
 void RemoveTodo(List<string> todos)
 {
     Console.Clear();
-    string input;
-    int index;
-    bool todoRemoved = false;
+
     if (todos.Count == 0)
     {
-        Console.WriteLine("No TODO's have been added yet.");
+        ShowNoToDosMessage();
+        return;
     }
+
+    int index;
     do
     {
         PrintTodos(todos);
         Console.WriteLine("Select the index of the TODO you want to remove:");
-        input = Console.ReadLine();
-        bool isIndex = int.TryParse(input, out index);
-        if (input == null)
-        {
-            Console.WriteLine("Selected index cannot be empty.");
-        }
-        else if (isIndex && index < todos.Count)
-        {
-            Console.WriteLine($"TODO removed: {todos.ElementAt(index - 1)}");
-            todos.RemoveAt(index - 1);
-            todoRemoved = true;
-        }
-        else
-        {
-            Console.WriteLine("The Given index is not valid");
-        }
-    } while (!todoRemoved);
+    } while (!TryReadIndex(out index));
+
+    RemoveToDoAtIndex(todos, index);
+}
+
+bool TryReadIndex(out int index)
+{
+    var input = Console.ReadLine();
+    if (input == "")
+    {
+        index = 0;
+        Console.WriteLine("Selected index cannot be empty.");
+        return false;
+    }
+    else if (int.TryParse(input, out index) && 
+        index <= todos.Count &&
+        index >= 1)
+    {
+        return true;
+    }
+        Console.WriteLine("The Given index is not valid");
+    return false;
+}
+static void ShowNoToDosMessage()
+{
+    Console.WriteLine("No TODOs have been added yet.");
+}
+
+static void RemoveToDoAtIndex(List<string> todos, int index)
+{
+    Console.WriteLine($"TODO removed: {todos.ElementAt(index - 1)}");
+    todos.RemoveAt(index - 1);
 }
